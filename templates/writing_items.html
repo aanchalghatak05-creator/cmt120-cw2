@@ -1,0 +1,18 @@
+{% for item in items %}
+<article class="entry">
+  <div style="display: flex; gap: 2rem; flex-wrap: wrap; align-items: flex-start;">
+      {% if item.image_url %}
+      <div class="article-image">
+          <img src="{{ item.image_url }}" alt="{{ item.title }}">
+      </div>
+      {% endif %}
+      <div style="flex: 1; min-width: 300px;">
+          <h3><a href="{{ item.url }}" target="_blank" rel="noopener">{{ item.title }}</a></h3>
+          <div class="meta">{{ item.publication or 'Independent' }} — {{ item.date }}{% if item.category %} • {{ item.category }}{% endif %}</div>
+          <p class="summary">{{ item.summary }}</p>
+      </div>
+  </div>
+</article>
+{% else %}
+<p class="muted" style="font-style: italic;">Nothing here yet.</p>
+{% endfor %}

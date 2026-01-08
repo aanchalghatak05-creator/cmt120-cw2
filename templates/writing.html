@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Writing</h2>
+
+<div class="filters">
+  <form id="filter-form" method="get">
+    <label>Year
+      <select name="year" class="ajax-filter">
+        <option value="">All</option>
+        {% for y in years %}
+        <option value="{{ y }}" {% if selected_year==y %}selected{% endif %}>{{ y }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>Category
+      <select name="category" class="ajax-filter">
+        <option value="">All</option>
+        {% for c in categories %}
+        <option value="{{ c }}" {% if selected_category==c %}selected{% endif %}>{{ c }}</option>
+        {% endfor %}
+      </select>
+    </label>
+  </form>
+</div>
+
+<section id="writing-list" class="list">
+  {% include 'writing_items.html' %}
+</section>
+
+<script>
+document.querySelectorAll('.ajax-filter').forEach(select => {
+    select.addEventListener('change', async function() {
+        const form = document.getElementById('filter-form');
+        const formData = new FormData(form);
+        const params = new URLSearchParams(formData);
+        
+        const listContainer = document.getElementById('writing-list');
+        listContainer.style.opacity = '0.5';
+        
+        try {
+            const response = await fetch('/writing?' + params.toString(), {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+            const html = await response.text();
+            listContainer.innerHTML = html;
+            listContainer.style.opacity = '1';
+            
+            // Update URL without reload
+            window.history.pushState({}, '', '/writing?' + params.toString());
+        } catch (err) {
+            console.error('Filter failed:', err);
+            listContainer.style.opacity = '1';
+        }
+    });
+});
+</script>
+{% endblock %}

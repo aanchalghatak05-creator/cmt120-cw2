@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="contact-section" style="max-width: 600px; margin: 0 auto;">
+  <h2>Contact</h2>
+  <p class="muted">Have a lead or want to collaborate? Get in touch.</p>
+
+  <div style="margin: 2rem 0; padding-bottom: 2rem; border-bottom: 1px solid var(--border);">
+    <p>Email: <a href="mailto:{{ profile.email }}" class="external">{{ profile.email }}</a></p>
+    <p>Social: <a href="{{ profile.twitter }}" target="_blank" class="external">Twitter</a> • <a href="{{ profile.linkedin }}" target="_blank" class="external">LinkedIn</a></p>
+  </div>
+
+  <form id="contact-form" method="post" class="contact-form">
+    <label>Name<br><input name="name" required placeholder="Your name"></label>
+    <label>Email<br><input type="email" name="email" required placeholder="email@example.com"></label>
+    <label>Message<br><textarea name="message" required rows="5" placeholder="Your message..."></textarea></label>
+    
+    <div id="contact-status" style="margin-top: 1rem; padding: 1rem; border-radius: 4px; display: none;"></div>
+    
+    <button type="submit" id="submit-btn" style="width: 100%;">Send Message</button>
+  </form>
+</section>
+
+<script>
+document.getElementById('contact-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const btn = document.getElementById('submit-btn');
+    const status = document.getElementById('contact-status');
+    const originalText = btn.textContent;
+    
+    // Disable the button and show loading state
+    btn.disabled = true;
+    btn.textContent = 'Submitting...';
+    btn.style.opacity = '0.7';
+    status.style.display = 'none';
+    
+    const formData = new FormData(this);
+    try {
+        const response = await fetch('/contact', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+        const result = await response.json();
+        
+        status.style.display = 'block';
+        if (result.status === 'success') {
+            status.textContent = result.message;
+            status.style.background = 'var(--accent-soft)';
+            status.style.color = 'var(--text)';
+            this.reset();
+            btn.textContent = 'Sent!';
+        } else {
+            status.textContent = result.message;
+            status.style.background = '#fee2e2';
+            status.style.color = '#991b1b';
+            btn.disabled = false;
+            btn.textContent = originalText;
+            btn.style.opacity = '1';
+        }
+    } catch (err) {
+        status.style.display = 'block';
+        status.textContent = 'Network error. Please try again.';
+        status.style.background = '#fee2e2';
+        status.style.color = '#991b1b';
+        btn.disabled = false;
+        btn.textContent = originalText;
+        btn.style.opacity = '1';
+    }
+});
+</script>
+{% endblock %}

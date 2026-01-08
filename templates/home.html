@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="hero">
+  <img src="{{ profile.get('image_url') or 'https://www.csoonline.com/wp-content/uploads/2023/06/aanchal_ghatak_150x150-100891022-orig.jpg?quality=50&strip=all&w=150' }}" alt="Profile photo" class="profile-photo">
+  <h2 class="headline">{{ profile.name }} — Researcher & Journalist</h2>
+  <p class="lead">{{ profile.bio|truncate(150) }}</p>
+</section>
+
+<section class="featured">
+  <h3>Featured work</h3>
+  <div class="featured-carousel">
+    <button class="carousel-prev" aria-label="Previous">‹</button>
+    <div class="carousel-track">
+      {% for item in featured %}
+      <div class="carousel-item card">
+        <div class="card-image-wrapper">
+          <img src="{{ item.image_url or get_yt_thumb(item.url) or 'https://via.placeholder.com/400x225?text=Feature' }}" alt="{{ item.title }}">
+        </div>
+        <div class="card-content">
+          <div class="meta">{{ item.publication or 'Independent' }} • {{ item.date }}</div>
+          <h4><a href="{{ item.url }}" target="_blank" rel="noopener">{{ item.title }}</a></h4>
+          <p class="summary" style="font-size: 0.85rem; line-height: 1.4;">{{ item.summary|truncate(60) }}</p>
+        </div>
+      </div>
+      {% else %}
+      <p class="muted" style="font-style: italic;">Nothing here yet.</p>
+      {% endfor %}
+    </div>
+    <button class="carousel-next" aria-label="Next">›</button>
+  </div>
+</section>
+
+<section class="latest">
+  <h3>Latest updates</h3>
+  <ul class="list">
+    {% for item in latest %}
+    <li>
+      <a href="{{ item.url }}" target="_blank" rel="noopener">{{ item.title }}</a>
+      <span class="muted"> — {{ item.type }} @ {{ item.publication or 'Independent' }} ({{ item.date }})</span>
+    </li>
+    {% else %}
+    <li class="muted" style="font-style: italic; border: none; padding-left: 0;">Nothing here yet.</li>
+    {% endfor %}
+  </ul>
+</section>
+{% endblock %}

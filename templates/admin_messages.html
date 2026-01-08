@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Admin — Messages</h2>
+<p><a href="{{ url_for('admin_index') }}" class="external">Back to Dashboard</a></p>
+
+{% for msg in messages %}
+<article class="entry card" style="padding: 1.5rem; margin-bottom: 2rem; border: 1px solid var(--border);">
+    <div class="meta">{{ msg.date }}</div>
+    <h4>From: {{ msg.name }}</h4>
+    <p><strong>Email:</strong> <a href="mailto:{{ msg.email }}">{{ msg.email }}</a></p>
+    <p class="summary" style="white-space: pre-wrap;">{{ msg.message }}</p>
+    <form action="{{ url_for('admin_delete_message', msg_id=msg.id) }}" method="post" onsubmit="return confirm('Delete this message?');">
+        <button type="submit" style="background: #fee2e2; color: #991b1b; padding: 0.5rem 1rem; font-size: 0.8rem;">Delete Message</button>
+    </form>
+</article>
+{% else %}
+<p>No messages yet.</p>
+{% endfor %}
+{% endblock %}

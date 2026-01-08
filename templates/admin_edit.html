@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>{% if item %}Edit{% else %}New{% endif %} item</h2>
+
+<form id="admin-form" method="post" class="admin-form" enctype="multipart/form-data">
+  <label>Content Type<br>
+    <select name="type" id="type-select">
+      <option value="Writing" {% if item and item.type=='Writing' %}selected{% endif %}>Writing (Article, Feature, Opinion)</option>
+      <option value="Multimedia" {% if item and item.type=='Multimedia' %}selected{% endif %}>Multimedia (Podcast, Video)</option>
+    </select>
+  </label>
+
+  <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--border);">
+
+  <label>Title<br><input name="title" required value="{{ item.title if item }}"></label>
+  
+  <label id="label-image">Image URL (optional)<br><input name="image_url" placeholder="https://example.com/image.jpg" value="{{ item.image_url if item }}"></label>
+
+    <label>Or upload image<br><input type="file" name="image_file" accept="image/*"></label>
+
+
+  <label id="label-subtype">Subtype (e.g. Feature, Opinion / Podcast, Video)<br><input name="subtype" value="{{ item.subtype if item }}"></label>
+
+  <label id="label-pub">Publication / Platform<br><input name="publication" value="{{ item.publication if item }}"></label>
+
+  <label id="label-url">External URL<br><input name="url" required value="{{ item.url if item }}"></label>
+
+  <label>Date (YYYY-MM-DD)<br><input name="date" type="date" value="{{ item.date if item }}"></label>
+
+  <div id="writing-fields">
+    <label>Category (optional)<br><input name="category" value="{{ item.category if item }}"></label>
+  </div>
+
+  <label>Summary / Description<br><textarea name="summary" rows="4">{{ item.summary if item }}</textarea></label>
+
+  <label><input type="checkbox" name="featured" {% if item and item.featured==1 %}checked{% endif %}> Featured on Homepage</label>
+
+  <div id="form-status" style="margin-top: 1rem; font-weight: bold; display: none;"></div>
+  
+  <div style="margin-top: 2rem;">
+      <button type="submit" id="save-btn">Save</button> 
+      <a href="{{ url_for('admin_content') }}" class="external" style="margin-left: 1rem;">Cancel</a>
+  </div>
+</form>
+
+<script>
+const typeSelect = document.getElementById('type-select');
+const writingFields = document.getElementById('writing-fields');
+const labelPub = document.getElementById('label-pub');
+const labelUrl = document.getElementById('label-url');
+
+function updateForm() {
+    if (typeSelect.value === 'Writing') {
+        writingFields.style.display = 'block';
+        labelPub.innerHTML = 'Publication<br><input name="publication" value="{{ item.publication if item }}">';
+        labelUrl.innerHTML = 'Article URL<br><input name="url" required value="{{ item.url if item }}">';
+    } else {
+        writingFields.style.display = 'none';
+        labelPub.innerHTML = 'Platform (e.g. YouTube, Spotify)<br><input name="publication" value="{{ item.publication if item }}">';
+        labelUrl.innerHTML = 'Video / Podcast URL<br><input name="url" required value="{{ item.url if item }}">';
+    }
+}
+
+typeSelect.addEventListener('change', updateForm);
+updateForm();
+
+document.getElementById('admin-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const statusDiv = document.getElementById('form-status');
+    const saveBtn = document.getElementById('save-btn');
+    const originalBtnText = saveBtn.textContent;
+    
+    saveBtn.textContent = 'Saving...';
+    saveBtn.disabled = true;
+    statusDiv.style.display = 'none';
+    
+    const formData = new FormData(this);
+    try {
+        const response = await fetch(window.location.href, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+        const result = await response.json();
+        if (result.status === 'success') {
+            saveBtn.textContent = 'Success!';
+            setTimeout(() => {
+                window.location.href = "{{ url_for('admin_content') }}";
+            }, 1000);
+        } else {
+            statusDiv.textContent = 'Error: ' + result.message;
+            statusDiv.style.display = 'block';
+            statusDiv.style.color = 'red';
+            saveBtn.textContent = originalBtnText;
+            saveBtn.disabled = false;
+        }
+    } catch (err) {
+        statusDiv.textContent = 'Network error occurred.';
+        statusDiv.style.display = 'block';
+        statusDiv.style.color = 'red';
+        saveBtn.textContent = originalBtnText;
+        saveBtn.disabled = false;
+    }
+});
+</script>
+{% endblock %}

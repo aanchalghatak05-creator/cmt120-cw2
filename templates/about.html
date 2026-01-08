@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block content %}
+<section class="about" style="max-width: 920px; margin: 0 auto;">
+    <div class="about-header">
+        <div class="about-photo-wrap">
+            <img class="about-photo" src="{{ profile.image_url or url_for('static', filename='images/profile.svg') }}" alt="{{ profile.name }}">
+        </div>
+        <div class="about-intro">
+            <h2>Hi — I'm {{ profile.name or 'Aanchal Ghatak' }}</h2>
+            <p class="lead">{{ profile.bio or 'Journalist and Researcher specializing in Computational Journalism.' }}</p>
+            <div class="social-links" style="margin-top: 1rem; display:flex; gap:1rem; align-items:center;">
+                {% if profile.linkedin %}<a href="{{ profile.linkedin }}" target="_blank" class="external">LinkedIn</a>{% endif %}
+                {% if profile.twitter %}<a href="{{ profile.twitter }}" target="_blank" class="external">Twitter</a>{% endif %}
+                {% if profile.email %}<a href="mailto:{{ profile.email }}" class="external">Email</a>{% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="about-body">
+        <div class="skills-box">
+            <h4>Specializations</h4>
+            <ul>
+                <li>Python & Computational Journalism</li>
+                <li>Digital Investigation & OSINT</li>
+                <li>Data Analysis & Visualization</li>
+                <li>Newsroom Research & Fact-Checking</li>
+            </ul>
+        </div>
+
+        <div class="gallery-section">
+            <h3>Selected photos</h3>
+            <div class="gallery-grid">
+                {%- set imgs = profile.get('about_images') or '' -%}
+                {%- set imgs_list = imgs.split(',') if imgs else [] -%}
+                {% for img in imgs_list %}
+                    {% if img %}
+                        <button class="gallery-item" data-src="{{ img.strip() }}">
+                            <img src="{{ get_thumb_for(img.strip()) }}" alt="photo">
+                        </button>
+                    {% endif %}
+                {% else %}
+                    <p class="muted">No photos yet — add images via <a href="{{ url_for('admin_profile') }}">Admin → Profile</a>.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Lightbox modal -->
+    <div id="lightbox" class="lightbox" aria-hidden="true">
+        <button class="lightbox-close" aria-label="Close">×</button>
+        <img class="lightbox-img" src="" alt="">
+    </div>
+</section>
+{% endblock %}

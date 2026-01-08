@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Admin — Content</h2>
+<p><a href="{{ url_for('admin_new') }}" class="external">+ New item</a> • <a href="{{ url_for('admin_index') }}" class="external">Back to Dashboard</a></p>
+
+<table class="admin-table">
+  <thead><tr><th>Title</th><th>Type</th><th>Publication</th><th>Date</th><th>Featured</th><th>Actions</th></tr></thead>
+  <tbody>
+    {% for it in items %}
+    <tr id="row-{{ it.id }}">
+      <td>{{ it.title }}</td>
+      <td>{{ it.type }}</td>
+      <td>{{ it.publication }}</td>
+      <td>{{ it.date }}</td>
+      <td>{{ 'Yes' if it.featured==1 else '' }}</td>
+      <td>
+        <a href="{{ url_for('admin_edit', item_id=it.id) }}" class="external">Edit</a>
+        <button onclick="deleteItem({{ it.id }})" class="link" style="margin-left: 0.5rem;">Delete</button>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<script>
+async function deleteItem(id) {
+    if (!confirm('Delete this item?')) return;
+    
+    const row = document.getElementById('row-' + id);
+    try {
+        const response = await fetch('/admin/delete/' + id, {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        });
+        const result = await response.json();
+        if (result.status === 'success') {
+            row.style.opacity = '0.5';
+            setTimeout(() => row.remove(), 300);
+        } else {
+            alert('Error: ' + result.message);
+        }
+    } catch (err) {
+        alert('Network error occurred.');
+    }
+}
+</script>
+{% endblock %}
